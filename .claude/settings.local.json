@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"c:\\\\Users\\\\natha\\\\Documents\\\\GitHub\\\\no-waste-app\")",
+      "Bash(dir \"c:\\\\Users\\\\natha\\\\Documents\\\\GitHub\\\\no-waste-app\\\\lib\")",
+      "Bash(dir \"c:\\\\Users\\\\natha\\\\Documents\\\\GitHub\\\\no-waste-app\\\\services\")",
+      "Bash(dir \"c:\\\\Users\\\\natha\\\\Documents\\\\GitHub\\\\no-waste-app\\\\hooks\")",
+      "Bash(findstr \"axios\" \"c:\\\\Users\\\\natha\\\\Documents\\\\GitHub\\\\no-waste-app\\\\package.json\")",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

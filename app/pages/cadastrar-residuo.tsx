@@ -1,42 +1,57 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Checkbox } from "../components/ui/checkbox";
-import { ArrowLeft, ArrowRight, Check, Upload, Info, Truck, ScrollText } from "lucide-react";
-
-type TipoVenda = "venda" | "doacao";
-type Frete = "ofertante" | "negociar";
+import { ArrowLeft, ArrowRight, Check, Upload, Info, Truck, ScrollText, Loader2, AlertCircle, FileCheck2 } from "lucide-react";
+import { useCriarResiduo } from "@/hooks/useResiduos";
+import type { CategoriaResiduo, ClassePericulosidade, TipoOferta } from "@/types/residuos";
 
 export function CadastrarResiduoPage() {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  const { criar, loading: salvando, error: erroApi } = useCriarResiduo();
 
   const [aceitouTermos, setAceitouTermos] = useState(false);
+  const [laudos, setLaudos] = useState<File[]>([]);
+  const laudoRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     nome: "",
-    categoria: "",
-    composicao: "",
-    classe: "",
+    categoria: "" as CategoriaResiduo | "",
+    quantidadeKg: "",
+    composicaoQuimica: "",
+    classePericulosidade: "" as ClassePericulosidade | "",
     localizacao: "",
-    prazo: "",
-    tipoVenda: "venda" as TipoVenda,
+    prazoDisponibilidade: "",
+    tipoOferta: "VENDA" as TipoOferta,
     preco: "",
-    frete: "ofertante" as Frete,
   });
 
-  const handleNext = () => {
-    if (step < 3) setStep(step + 1);
-  };
+  const handleNext = () => { if (step < 3) setStep(step + 1); };
+  const handleBack = () => { if (step > 1) setStep(step - 1); };
 
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleSubmit = () => {
-    navigate("/residuos");
+  const handleSubmit = async () => {
+    try {
+      await criar({
+        nome: formData.nome,
+        categoria: formData.categoria as CategoriaResiduo,
+        composicaoQuimica: formData.composicaoQuimica || undefined,
+        classePericulosidade: formData.classePericulosidade as ClassePericulosidade,
+        localizacao: formData.localizacao,
+        prazoDisponibilidade: formData.prazoDisponibilidade,
+        tipoOferta: formData.tipoOferta,
+        preco: formData.preco ? Number(formData.preco) : null,
+        frete: "OFERTANTE",
+        quantidadeKg: Number(formData.quantidadeKg),
+        aceitouTermos,
+        laudoTecnico: laudos,
+      });
+      navigate("/residuos");
+    } catch {
+      // erro capturado pelo hook, exibido abaixo
+    }
   };
 
   return (
@@ -54,17 +69,11 @@ export function CadastrarResiduoPage() {
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center flex-1">
               <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                s <= step
-                  ? "bg-primary border-primary text-white"
-                  : "border-border text-muted-foreground"
+                s <= step ? "bg-primary border-primary text-white" : "border-border text-muted-foreground"
               }`}>
                 {s < step ? <Check className="h-5 w-5" /> : s}
               </div>
-              {s < 3 && (
-                <div className={`flex-1 h-0.5 mx-2 ${
-                  s < step ? "bg-primary" : "bg-border"
-                }`} />
-              )}
+              {s < 3 && <div className={`flex-1 h-0.5 mx-2 ${s < step ? "bg-primary" : "bg-border"}`} />}
             </div>
           ))}
         </div>
@@ -87,6 +96,14 @@ export function CadastrarResiduoPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Erro da API */}
+      {erroApi && (
+        <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive mb-4">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <span className="text-sm">{erroApi}</span>
+        </div>
+      )}
 
       {/* Form Steps */}
       <Card>
@@ -114,15 +131,25 @@ export function CadastrarResiduoPage() {
                 <select
                   className="w-full px-3 py-2 bg-white border border-border rounded-lg"
                   value={formData.categoria}
-                  onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, categoria: e.target.value as CategoriaResiduo })}
                 >
                   <option value="">Selecione...</option>
-                  <option value="solido">Sólido</option>
-                  <option value="efluente">Efluente químico</option>
-                  <option value="mistura">Mistura</option>
-                  <option value="medico">Resíduo médico</option>
-                  <option value="construcao">Construção civil</option>
+                  <option value="SOLIDO">Sólido</option>
+                  <option value="EFLUENTE_QUIMICO">Efluente químico</option>
+                  <option value="MISTURA">Mistura</option>
+                  <option value="RESIDUO_MEDICO">Resíduo médico</option>
+                  <option value="CONSTRUCAO_CIVIL">Construção civil</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block mb-1.5 text-sm text-foreground">Quantidade disponível (kg)</label>
+                <Input
+                  type="number"
+                  placeholder="Ex: 5000"
+                  value={formData.quantidadeKg}
+                  onChange={(e) => setFormData({ ...formData, quantidadeKg: e.target.value })}
+                />
               </div>
             </div>
           )}
@@ -134,8 +161,8 @@ export function CadastrarResiduoPage() {
                 <textarea
                   className="w-full px-3 py-2 bg-white border border-border rounded-lg min-h-[100px]"
                   placeholder="Descreva a composição química do resíduo..."
-                  value={formData.composicao}
-                  onChange={(e) => setFormData({ ...formData, composicao: e.target.value })}
+                  value={formData.composicaoQuimica}
+                  onChange={(e) => setFormData({ ...formData, composicaoQuimica: e.target.value })}
                 />
               </div>
 
@@ -143,43 +170,60 @@ export function CadastrarResiduoPage() {
                 <label className="block mb-1.5 text-sm text-foreground">Classe de periculosidade</label>
                 <select
                   className="w-full px-3 py-2 bg-white border border-border rounded-lg"
-                  value={formData.classe}
-                  onChange={(e) => setFormData({ ...formData, classe: e.target.value })}
+                  value={formData.classePericulosidade}
+                  onChange={(e) => setFormData({ ...formData, classePericulosidade: e.target.value as ClassePericulosidade })}
                 >
                   <option value="">Selecione...</option>
-                  <option value="1">Classe I - Perigoso</option>
-                  <option value="2a">Classe II-A - Não inerte</option>
-                  <option value="2b">Classe II-B - Inerte</option>
+                  <option value="CLASSE_I">Classe I - Perigoso</option>
+                  <option value="CLASSE_IIA">Classe II-A - Não inerte</option>
+                  <option value="CLASSE_IIB">Classe II-B - Inerte</option>
                 </select>
               </div>
 
+              {/* Upload Laudo */}
               <div>
                 <label className="block mb-1.5 text-sm text-foreground">Laudos / Fichas técnicas</label>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                <input
+                  ref={laudoRef}
+                  type="file"
+                  accept="application/pdf"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const novos = Array.from(e.target.files ?? []);
+                    setLaudos((prev) => [...prev, ...novos]);
+                    if (laudoRef.current) laudoRef.current.value = "";
+                  }}
+                />
+                <div
+                  className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer"
+                  onClick={() => laudoRef.current?.click()}
+                >
                   <Upload className="h-7 w-7 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Clique para fazer upload ou arraste o arquivo
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">PDF, máx. 10MB</p>
+                  <p className="text-sm text-muted-foreground">Clique para adicionar arquivos</p>
+                  <p className="text-xs text-muted-foreground mt-1">PDF, máx. 10MB por arquivo</p>
                 </div>
+                {laudos.length > 0 && (
+                  <ul className="mt-2 space-y-1">
+                    {laudos.map((f, i) => (
+                      <li key={i} className="flex items-center justify-between gap-2 text-sm text-primary">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileCheck2 className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{f.name}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setLaudos((prev) => prev.filter((_, j) => j !== i))}
+                          className="text-xs text-destructive hover:underline shrink-0"
+                        >
+                          Remover
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
-              <div>
-                <label className="block mb-1.5 text-sm text-foreground">
-                  Orçamento de custo de descarte
-                </label>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Documentos com o custo atual que sua empresa teria com o descarte convencional deste resíduo.
-                  Isso ajuda a demonstrar o valor da solução NoWaste.
-                </p>
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
-                  <Upload className="h-7 w-7 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Clique para fazer upload ou arraste o arquivo
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">PDF, máx. 10MB</p>
-                </div>
-              </div>
             </div>
           )}
 
@@ -198,8 +242,8 @@ export function CadastrarResiduoPage() {
                 <label className="block mb-1.5 text-sm text-foreground">Prazo de disponibilidade</label>
                 <Input
                   type="date"
-                  value={formData.prazo}
-                  onChange={(e) => setFormData({ ...formData, prazo: e.target.value })}
+                  value={formData.prazoDisponibilidade}
+                  onChange={(e) => setFormData({ ...formData, prazoDisponibilidade: e.target.value })}
                 />
               </div>
 
@@ -207,34 +251,25 @@ export function CadastrarResiduoPage() {
               <div>
                 <label className="block mb-2 text-sm text-foreground font-medium">Tipo de oferta</label>
                 <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, tipoVenda: "venda" })}
-                    className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
-                      formData.tipoVenda === "venda"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border text-muted-foreground hover:border-primary/50"
-                    }`}
-                  >
-                    Venda
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, tipoVenda: "doacao", preco: "" })}
-                    className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
-                      formData.tipoVenda === "doacao"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border text-muted-foreground hover:border-primary/50"
-                    }`}
-                  >
-                    Doação
-                  </button>
+                  {(["VENDA", "DOACAO"] as TipoOferta[]).map((tipo) => (
+                    <button
+                      key={tipo}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tipoOferta: tipo, preco: tipo === "DOACAO" ? "" : formData.preco })}
+                      className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                        formData.tipoOferta === tipo
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-border text-muted-foreground hover:border-primary/50"
+                      }`}
+                    >
+                      {tipo === "VENDA" ? "Venda" : "Doação"}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Preço — só aparece em Venda */}
-              {formData.tipoVenda === "venda" && (
-                <div>
+              {formData.tipoOferta === "VENDA" && (
+                <div className="space-y-2">
                   <label className="block mb-1.5 text-sm text-foreground">Preço (R$) — deixe em branco para 'A negociar'</label>
                   <Input
                     type="number"
@@ -242,51 +277,22 @@ export function CadastrarResiduoPage() {
                     value={formData.preco}
                     onChange={(e) => setFormData({ ...formData, preco: e.target.value })}
                   />
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">
+                    <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                    <div className="text-xs">
+                      <span className="font-medium">Comissão NoWaste: 10% sobre o valor da venda.</span>
+                      {formData.preco && Number(formData.preco) > 0 && (
+                        <span className="block mt-0.5 text-amber-700">
+                          Sobre R$ {Number(formData.preco).toLocaleString("pt-BR")}, a comissão será de{" "}
+                          <strong>R$ {(Number(formData.preco) * 0.1).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>{" "}
+                          e você receberá{" "}
+                          <strong>R$ {(Number(formData.preco) * 0.9).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>.
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
-
-              {/* Frete */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Truck className="h-4 w-4 text-foreground" />
-                  <label className="text-sm text-foreground font-medium">Custo do frete</label>
-                </div>
-
-                <Card className="border-muted bg-muted/20 mb-3">
-                  <CardContent className="pt-4 pb-4">
-                    <p className="text-xs text-muted-foreground">
-                      {formData.tipoVenda === "doacao"
-                        ? "Na doação, o ofertante arca com o custo do frete por padrão."
-                        : "Na venda, o ofertante arca com o custo do frete por padrão."}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, frete: "ofertante" })}
-                    className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
-                      formData.frete === "ofertante"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border text-muted-foreground hover:border-primary/50"
-                    }`}
-                  >
-                    Ofertante paga (padrão)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, frete: "negociar" })}
-                    className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
-                      formData.frete === "negociar"
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border text-muted-foreground hover:border-primary/50"
-                    }`}
-                  >
-                    A negociar
-                  </button>
-                </div>
-              </div>
 
               {/* Termos de uso */}
               <div>
@@ -296,27 +302,13 @@ export function CadastrarResiduoPage() {
                 </div>
                 <div className="border border-border rounded-lg h-40 overflow-y-auto p-4 bg-muted/20 text-xs text-muted-foreground space-y-3 mb-4">
                   <p className="font-semibold text-foreground">Termos de Uso — Plataforma NoWaste</p>
-                  <p>
-                    Ao publicar um resíduo nesta plataforma, o ofertante declara e concorda com os seguintes termos:
-                  </p>
-                  <p>
-                    <strong>1. Veracidade das informações.</strong> As informações fornecidas sobre o resíduo (composição, classe de periculosidade, quantidade, localização e prazo) são verdadeiras e correspondem à realidade. O ofertante é o único responsável por dados incorretos ou omitidos.
-                  </p>
-                  <p>
-                    <strong>2. Conformidade legal.</strong> O ofertante declara que a geração, armazenagem e destinação do resíduo estão em conformidade com a legislação ambiental vigente, incluindo a Política Nacional de Resíduos Sólidos (Lei nº 12.305/2010), as normas ABNT NBR 10.004 a 10.007 e demais regulamentações estaduais e municipais aplicáveis.
-                  </p>
-                  <p>
-                    <strong>3. Documentação obrigatória.</strong> O ofertante se compromete a fornecer, quando solicitado, toda a documentação técnica pertinente ao resíduo, incluindo laudos laboratoriais, Fichas de Informações de Segurança (FISPQ) e Manifesto de Transporte de Resíduos (MTR), conforme exigido pela legislação.
-                  </p>
-                  <p>
-                    <strong>4. Rastreabilidade.</strong> O ofertante autoriza a NoWaste a registrar e manter o histórico completo das transações e movimentações do resíduo, garantindo a cadeia de custódia e rastreabilidade exigida pelos órgãos ambientais.
-                  </p>
-                  <p>
-                    <strong>5. Responsabilidade civil e ambiental.</strong> O ofertante reconhece sua corresponsabilidade civil e ambiental até a destinação final adequada do resíduo, nos termos do art. 30 da Lei nº 12.305/2010.
-                  </p>
-                  <p>
-                    <strong>6. Uso de dados.</strong> Os dados cadastrados poderão ser utilizados pela NoWaste para fins de relatórios ambientais, certificações de economia circular e auditorias, respeitada a confidencialidade das partes conforme nossa Política de Privacidade.
-                  </p>
+                  <p>Ao publicar um resíduo nesta plataforma, o ofertante declara e concorda com os seguintes termos:</p>
+                  <p><strong>1. Veracidade das informações.</strong> As informações fornecidas sobre o resíduo são verdadeiras e correspondem à realidade. O ofertante é o único responsável por dados incorretos ou omitidos.</p>
+                  <p><strong>2. Conformidade legal.</strong> O ofertante declara conformidade com a legislação ambiental vigente, incluindo a Política Nacional de Resíduos Sólidos (Lei nº 12.305/2010) e as normas ABNT NBR 10.004 a 10.007.</p>
+                  <p><strong>3. Documentação obrigatória.</strong> O ofertante se compromete a fornecer laudos laboratoriais, FISPQ e Manifesto de Transporte de Resíduos (MTR) quando solicitado.</p>
+                  <p><strong>4. Rastreabilidade.</strong> O ofertante autoriza a NoWaste a registrar e manter o histórico completo das transações, garantindo a cadeia de custódia exigida pelos órgãos ambientais.</p>
+                  <p><strong>5. Responsabilidade civil e ambiental.</strong> O ofertante reconhece sua corresponsabilidade até a destinação final adequada do resíduo, nos termos do art. 30 da Lei nº 12.305/2010.</p>
+                  <p><strong>6. Uso de dados.</strong> Os dados poderão ser utilizados para relatórios ambientais, certificações e auditorias, respeitada a Política de Privacidade da NoWaste.</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <Checkbox
@@ -339,16 +331,26 @@ export function CadastrarResiduoPage() {
         <Button
           variant="outline"
           onClick={step === 1 ? () => navigate("/residuos") : handleBack}
+          disabled={salvando}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           {step === 1 ? "Cancelar" : "Voltar"}
         </Button>
         <Button
           onClick={step === 3 ? handleSubmit : handleNext}
-          disabled={step === 3 && !aceitouTermos}
+          disabled={(step === 3 && !aceitouTermos) || salvando}
         >
-          {step === 3 ? "Publicar resíduo" : "Próximo"}
-          {step < 3 && <ArrowRight className="h-4 w-4 ml-2" />}
+          {salvando ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Publicando...
+            </>
+          ) : (
+            <>
+              {step === 3 ? "Publicar resíduo" : "Próximo"}
+              {step < 3 && <ArrowRight className="h-4 w-4 ml-2" />}
+            </>
+          )}
         </Button>
       </div>
     </div>
