@@ -3,7 +3,8 @@ import { useNavigate } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { ArrowLeft, ArrowRight, Check, Upload, Info, Truck } from "lucide-react";
+import { Checkbox } from "../components/ui/checkbox";
+import { ArrowLeft, ArrowRight, Check, Upload, Info, Truck, ScrollText } from "lucide-react";
 
 type TipoVenda = "venda" | "doacao";
 type Frete = "ofertante" | "negociar";
@@ -11,6 +12,8 @@ type Frete = "ofertante" | "negociar";
 export function CadastrarResiduoPage() {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+
+  const [aceitouTermos, setAceitouTermos] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -166,7 +169,7 @@ export function CadastrarResiduoPage() {
                   Orçamento de custo de descarte
                 </label>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Documento com o custo atual que sua empresa teria com o descarte convencional deste resíduo.
+                  Documentos com o custo atual que sua empresa teria com o descarte convencional deste resíduo.
                   Isso ajuda a demonstrar o valor da solução NoWaste.
                 </p>
                 <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
@@ -284,6 +287,48 @@ export function CadastrarResiduoPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Termos de uso */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <ScrollText className="h-4 w-4 text-foreground" />
+                  <label className="text-sm text-foreground font-medium">Termos de uso e responsabilidade</label>
+                </div>
+                <div className="border border-border rounded-lg h-40 overflow-y-auto p-4 bg-muted/20 text-xs text-muted-foreground space-y-3 mb-4">
+                  <p className="font-semibold text-foreground">Termos de Uso — Plataforma NoWaste</p>
+                  <p>
+                    Ao publicar um resíduo nesta plataforma, o ofertante declara e concorda com os seguintes termos:
+                  </p>
+                  <p>
+                    <strong>1. Veracidade das informações.</strong> As informações fornecidas sobre o resíduo (composição, classe de periculosidade, quantidade, localização e prazo) são verdadeiras e correspondem à realidade. O ofertante é o único responsável por dados incorretos ou omitidos.
+                  </p>
+                  <p>
+                    <strong>2. Conformidade legal.</strong> O ofertante declara que a geração, armazenagem e destinação do resíduo estão em conformidade com a legislação ambiental vigente, incluindo a Política Nacional de Resíduos Sólidos (Lei nº 12.305/2010), as normas ABNT NBR 10.004 a 10.007 e demais regulamentações estaduais e municipais aplicáveis.
+                  </p>
+                  <p>
+                    <strong>3. Documentação obrigatória.</strong> O ofertante se compromete a fornecer, quando solicitado, toda a documentação técnica pertinente ao resíduo, incluindo laudos laboratoriais, Fichas de Informações de Segurança (FISPQ) e Manifesto de Transporte de Resíduos (MTR), conforme exigido pela legislação.
+                  </p>
+                  <p>
+                    <strong>4. Rastreabilidade.</strong> O ofertante autoriza a NoWaste a registrar e manter o histórico completo das transações e movimentações do resíduo, garantindo a cadeia de custódia e rastreabilidade exigida pelos órgãos ambientais.
+                  </p>
+                  <p>
+                    <strong>5. Responsabilidade civil e ambiental.</strong> O ofertante reconhece sua corresponsabilidade civil e ambiental até a destinação final adequada do resíduo, nos termos do art. 30 da Lei nº 12.305/2010.
+                  </p>
+                  <p>
+                    <strong>6. Uso de dados.</strong> Os dados cadastrados poderão ser utilizados pela NoWaste para fins de relatórios ambientais, certificações de economia circular e auditorias, respeitada a confidencialidade das partes conforme nossa Política de Privacidade.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="aceite-termos"
+                    checked={aceitouTermos}
+                    onCheckedChange={(v) => setAceitouTermos(v === true)}
+                  />
+                  <label htmlFor="aceite-termos" className="text-sm text-foreground leading-snug cursor-pointer">
+                    Li e aceito os <span className="text-primary underline">Termos de Uso</span> e declaro que as informações fornecidas são verdadeiras, assumindo total responsabilidade civil e ambiental pela destinação deste resíduo.
+                  </label>
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
@@ -298,7 +343,10 @@ export function CadastrarResiduoPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           {step === 1 ? "Cancelar" : "Voltar"}
         </Button>
-        <Button onClick={step === 3 ? handleSubmit : handleNext}>
+        <Button
+          onClick={step === 3 ? handleSubmit : handleNext}
+          disabled={step === 3 && !aceitouTermos}
+        >
           {step === 3 ? "Publicar resíduo" : "Próximo"}
           {step < 3 && <ArrowRight className="h-4 w-4 ml-2" />}
         </Button>
