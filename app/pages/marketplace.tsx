@@ -19,7 +19,7 @@ export function MarketplacePage() {
       distancia: 12,
       preco: "R$ 150/ton",
       compatibilidade: 95,
-      empresa: "Siderúrgica ABC",
+      tipo: "Venda",
     },
     {
       id: 2,
@@ -29,7 +29,7 @@ export function MarketplacePage() {
       distancia: 8,
       preco: "A negociar",
       compatibilidade: 88,
-      empresa: "Química XYZ",
+      tipo: "Venda",
     },
     {
       id: 3,
@@ -37,9 +37,9 @@ export function MarketplacePage() {
       categoria: "Sólido",
       quantidade: 8000,
       distancia: 45,
-      preco: "R$ 80/ton",
+      preco: "Doação",
       compatibilidade: 82,
-      empresa: "Termelétrica DEF",
+      tipo: "Doação",
     },
     {
       id: 4,
@@ -49,7 +49,7 @@ export function MarketplacePage() {
       distancia: 22,
       preco: "R$ 20/ton",
       compatibilidade: 76,
-      empresa: "Construtora GHI",
+      tipo: "Venda",
     },
     {
       id: 5,
@@ -59,7 +59,7 @@ export function MarketplacePage() {
       distancia: 18,
       preco: "R$ 200/ton",
       compatibilidade: 90,
-      empresa: "Tratamento JKL",
+      tipo: "Venda",
     },
     {
       id: 6,
@@ -67,9 +67,9 @@ export function MarketplacePage() {
       categoria: "Sólido",
       quantidade: 12000,
       distancia: 35,
-      preco: "R$ 500/ton",
+      preco: "Doação",
       compatibilidade: 85,
-      empresa: "Metalúrgica MNO",
+      tipo: "Doação",
     },
   ];
 
@@ -221,13 +221,16 @@ export function MarketplacePage() {
                     </div>
 
                     <div className="flex items-center gap-2 mb-4">
-                      <Badge variant="success">Reaproveitável</Badge>
+                      <Badge variant="default">Reaproveitável</Badge>
                       <Badge variant="secondary">{residuo.compatibilidade}%</Badge>
+                      <Badge variant={residuo.tipo === "Doação" ? "outline" : "default"}>
+                        {residuo.tipo}
+                      </Badge>
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t border-border">
                       <span className="font-semibold text-primary">
-                        {residuo.preco}
+                        {residuo.tipo === "Doação" ? "Doação" : residuo.preco}
                       </span>
                       <Button size="sm" variant="outline">
                         Ver detalhes

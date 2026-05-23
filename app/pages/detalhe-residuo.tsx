@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { MapPin, Package, FileText, Building2, TrendingDown, ArrowLeft } from "lucide-react";
+import { MapPin, Package, FileText, TrendingDown, ArrowLeft } from "lucide-react";
 
 export function DetalheResiduoPage() {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ export function DetalheResiduoPage() {
                     Escória de alto-forno
                   </h1>
                   <div className="flex items-center gap-3 mb-4">
-                    <Badge variant="success">Reaproveitável</Badge>
+                    <Badge variant="default">Reaproveitável</Badge>
                     <Badge variant="secondary">95% compatível</Badge>
                     <Badge>Classe II-B</Badge>
                   </div>
@@ -180,28 +180,6 @@ export function DetalheResiduoPage() {
             </CardContent>
           </Card>
 
-          {/* Company Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Empresa Geradora
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">Siderúrgica ABC Ltda.</span> (parcialmente anonimizado)
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Ramo: Siderurgia e metalurgia
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Verificada pela NoWaste
-                </p>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Sticky Sidebar */}
@@ -214,7 +192,7 @@ export function DetalheResiduoPage() {
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-2xl font-bold text-success">95%</span>
-                  <Badge variant="success">Excelente</Badge>
+                  <Badge variant="default">Excelente</Badge>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div className="h-full bg-success" style={{ width: "95%" }} />

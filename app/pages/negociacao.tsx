@@ -10,28 +10,29 @@ export function NegociacaoPage() {
 
   const messages = [
     {
-      sender: "other",
-      company: "Siderúrgica ABC",
-      content: "Olá, tenho interesse no resíduo de escória. Podemos negociar um contrato trimestral?",
+      sender: "platform",
+      content: "Olá! Recebemos um interesse no seu resíduo de escória. Um comprador deseja negociar um contrato trimestral.",
       time: "10:30",
     },
     {
       sender: "me",
-      company: "Minha Empresa",
       content: "Sim, temos disponibilidade. Qual seria a quantidade mensal necessária?",
       time: "10:35",
     },
     {
-      sender: "other",
-      company: "Siderúrgica ABC",
-      content: "Precisamos de aproximadamente 5 toneladas/mês. O preço de R$ 150/ton está dentro do nosso orçamento.",
+      sender: "platform",
+      content: "O comprador informou que precisa de aproximadamente 5 toneladas/mês. O preço de R$ 150/ton está dentro do orçamento dele.",
       time: "10:42",
     },
     {
       sender: "me",
-      company: "Minha Empresa",
-      content: "Perfeito. Podemos formalizar o contrato. Vocês preferem retirada no local ou entrega?",
+      content: "Perfeito. Podemos formalizar o contrato. Qual a preferência de logística?",
       time: "10:45",
+    },
+    {
+      sender: "platform",
+      content: "O comprador prefere retirada no local. Podemos prosseguir com o contrato?",
+      time: "10:48",
     },
   ];
 
@@ -73,7 +74,7 @@ export function NegociacaoPage() {
             <CardHeader className="border-b border-border">
               <CardTitle>Negociação - Escória de alto-forno</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Com Siderúrgica ABC Ltda.
+                Intermediado pela NoWaste
               </p>
             </CardHeader>
 
@@ -88,12 +89,12 @@ export function NegociacaoPage() {
                       msg.sender === "me" ? "text-right" : "text-left"
                     }`}>
                       <p className="text-xs text-muted-foreground mb-1">
-                        {msg.company} • {msg.time}
+                        {msg.sender === "me" ? "Você" : "NoWaste"} • {msg.time}
                       </p>
                       <div className={`inline-block px-4 py-2 rounded-lg ${
                         msg.sender === "me"
                           ? "bg-primary text-white"
-                          : "bg-muted text-foreground"
+                          : "bg-secondary/20 text-foreground border border-secondary/30"
                       }`}>
                         {msg.content}
                       </div>

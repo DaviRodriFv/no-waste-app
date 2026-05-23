@@ -72,7 +72,7 @@ export function ResiduosPage() {
                     <div className="text-xs text-muted-foreground">Matches</div>
                   </div>
 
-                  <Badge variant={residuo.status === "Publicado" ? "success" : "secondary"}>
+                  <Badge variant={residuo.status === "Publicado" ? "default" : "secondary"}>
                     {residuo.status}
                   </Badge>
 

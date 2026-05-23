@@ -8,6 +8,7 @@ import { ResiduosPage } from "./pages/residuos";
 import { NegociacaoPage } from "./pages/negociacao";
 import { PlanosPage } from "./pages/planos";
 import { RelatoriosPage } from "./pages/relatorios";
+import { DocumentosPage } from "./pages/documentos";
 import { MainLayout } from "./components/layout/main-layout";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace/:id" element={<DetalheResiduoPage />} />
           <Route path="/negociacoes" element={<NegociacaoPage />} />
+          <Route path="/documentos" element={<DocumentosPage />} />
           <Route path="/relatorios" element={<RelatoriosPage />} />
           <Route path="/planos" element={<PlanosPage />} />
         </Route>

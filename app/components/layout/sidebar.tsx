@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ShoppingCart, MessageSquare, BarChart3, CreditCard } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, MessageSquare, BarChart3, CreditCard, FileText } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 const menuItems = [
@@ -6,6 +6,7 @@ const menuItems = [
   { icon: Package, label: "Meus Resíduos", path: "/residuos" },
   { icon: ShoppingCart, label: "Marketplace", path: "/marketplace" },
   { icon: MessageSquare, label: "Negociações", path: "/negociacoes" },
+  { icon: FileText, label: "Documentos e Contratos", path: "/documentos" },
   { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
   { icon: CreditCard, label: "Planos", path: "/planos" },
 ];

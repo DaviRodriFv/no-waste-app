@@ -3,7 +3,10 @@ import { useNavigate } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { ArrowLeft, ArrowRight, Check, Upload, Info } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Upload, Info, Truck } from "lucide-react";
+
+type TipoVenda = "venda" | "doacao";
+type Frete = "ofertante" | "negociar";
 
 export function CadastrarResiduoPage() {
   const [step, setStep] = useState(1);
@@ -12,14 +15,13 @@ export function CadastrarResiduoPage() {
   const [formData, setFormData] = useState({
     nome: "",
     categoria: "",
-    quantidade: "",
-    frequencia: "",
     composicao: "",
     classe: "",
     localizacao: "",
     prazo: "",
-    transporte: "",
+    tipoVenda: "venda" as TipoVenda,
     preco: "",
+    frete: "ofertante" as Frete,
   });
 
   const handleNext = () => {
@@ -39,7 +41,7 @@ export function CadastrarResiduoPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Cadastrar Resíduo</h1>
         <p className="text-muted-foreground">
-          Publique seu resíduo industrial para encontrar compradores
+          Publique seu resíduo industrial para encontrar compradores ou donatários
         </p>
       </div>
 
@@ -95,12 +97,14 @@ export function CadastrarResiduoPage() {
         <CardContent>
           {step === 1 && (
             <div className="space-y-4">
-              <Input
-                label="Nome do resíduo"
-                placeholder="Ex: Escória de alto-forno"
-                value={formData.nome}
-                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              />
+              <div>
+                <label className="block mb-1.5 text-sm text-foreground">Nome do resíduo</label>
+                <Input
+                  placeholder="Ex: Escória de alto-forno"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                />
+              </div>
 
               <div>
                 <label className="block mb-1.5 text-sm text-foreground">Categoria</label>
@@ -115,28 +119,6 @@ export function CadastrarResiduoPage() {
                   <option value="mistura">Mistura</option>
                   <option value="medico">Resíduo médico</option>
                   <option value="construcao">Construção civil</option>
-                </select>
-              </div>
-
-              <Input
-                label="Quantidade (kg)"
-                type="number"
-                placeholder="Ex: 5000"
-                value={formData.quantidade}
-                onChange={(e) => setFormData({ ...formData, quantidade: e.target.value })}
-              />
-
-              <div>
-                <label className="block mb-1.5 text-sm text-foreground">Frequência de geração</label>
-                <select
-                  className="w-full px-3 py-2 bg-white border border-border rounded-lg"
-                  value={formData.frequencia}
-                  onChange={(e) => setFormData({ ...formData, frequencia: e.target.value })}
-                >
-                  <option value="">Selecione...</option>
-                  <option value="mensal">Mensal</option>
-                  <option value="trimestral">Trimestral</option>
-                  <option value="anual">Anual</option>
                 </select>
               </div>
             </div>
@@ -169,61 +151,139 @@ export function CadastrarResiduoPage() {
               </div>
 
               <div>
-                <label className="block mb-1.5 text-sm text-foreground">Upload de laudo/ficha técnica</label>
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                <label className="block mb-1.5 text-sm text-foreground">Laudos / Fichas técnicas</label>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                  <Upload className="h-7 w-7 mx-auto mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
                     Clique para fazer upload ou arraste o arquivo
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    PDF, máx. 10MB
+                  <p className="text-xs text-muted-foreground mt-1">PDF, máx. 10MB</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1.5 text-sm text-foreground">
+                  Orçamento de custo de descarte
+                </label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Documento com o custo atual que sua empresa teria com o descarte convencional deste resíduo.
+                  Isso ajuda a demonstrar o valor da solução NoWaste.
+                </p>
+                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                  <Upload className="h-7 w-7 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Clique para fazer upload ou arraste o arquivo
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">PDF, máx. 10MB</p>
                 </div>
               </div>
             </div>
           )}
 
           {step === 3 && (
-            <div className="space-y-4">
-              <Input
-                label="Localização"
-                placeholder="Cidade, Estado"
-                value={formData.localizacao}
-                onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
-              />
-
-              <Input
-                label="Prazo de disponibilidade"
-                type="date"
-                value={formData.prazo}
-                onChange={(e) => setFormData({ ...formData, prazo: e.target.value })}
-              />
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-1.5 text-sm text-foreground">Localização</label>
+                <Input
+                  placeholder="Cidade, Estado"
+                  value={formData.localizacao}
+                  onChange={(e) => setFormData({ ...formData, localizacao: e.target.value })}
+                />
+              </div>
 
               <div>
-                <label className="block mb-1.5 text-sm text-foreground">Opções de transporte</label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="rounded border-border" />
-                    <span className="text-sm">Fornecedor transporta</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="rounded border-border" />
-                    <span className="text-sm">Retirada no local</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="rounded border-border" />
-                    <span className="text-sm">A combinar</span>
-                  </label>
+                <label className="block mb-1.5 text-sm text-foreground">Prazo de disponibilidade</label>
+                <Input
+                  type="date"
+                  value={formData.prazo}
+                  onChange={(e) => setFormData({ ...formData, prazo: e.target.value })}
+                />
+              </div>
+
+              {/* Tipo de oferta */}
+              <div>
+                <label className="block mb-2 text-sm text-foreground font-medium">Tipo de oferta</label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, tipoVenda: "venda" })}
+                    className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                      formData.tipoVenda === "venda"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    Venda
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, tipoVenda: "doacao", preco: "" })}
+                    className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                      formData.tipoVenda === "doacao"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    Doação
+                  </button>
                 </div>
               </div>
 
-              <Input
-                label="Preço (R$) ou deixe em branco para 'A negociar'"
-                type="number"
-                placeholder="Ex: 500"
-                value={formData.preco}
-                onChange={(e) => setFormData({ ...formData, preco: e.target.value })}
-              />
+              {/* Preço — só aparece em Venda */}
+              {formData.tipoVenda === "venda" && (
+                <div>
+                  <label className="block mb-1.5 text-sm text-foreground">Preço (R$) — deixe em branco para 'A negociar'</label>
+                  <Input
+                    type="number"
+                    placeholder="Ex: 500"
+                    value={formData.preco}
+                    onChange={(e) => setFormData({ ...formData, preco: e.target.value })}
+                  />
+                </div>
+              )}
+
+              {/* Frete */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Truck className="h-4 w-4 text-foreground" />
+                  <label className="text-sm text-foreground font-medium">Custo do frete</label>
+                </div>
+
+                <Card className="border-muted bg-muted/20 mb-3">
+                  <CardContent className="pt-4 pb-4">
+                    <p className="text-xs text-muted-foreground">
+                      {formData.tipoVenda === "doacao"
+                        ? "Na doação, o ofertante arca com o custo do frete por padrão."
+                        : "Na venda, o ofertante arca com o custo do frete por padrão."}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, frete: "ofertante" })}
+                    className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                      formData.frete === "ofertante"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    Ofertante paga (padrão)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, frete: "negociar" })}
+                    className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all ${
+                      formData.frete === "negociar"
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    A negociar
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </CardContent>
