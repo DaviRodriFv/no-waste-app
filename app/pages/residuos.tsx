@@ -73,6 +73,7 @@ export function ResiduosPage() {
   const [loadingDetalhe, setLoadingDetalhe] = useState(false);
   const [deletandoDocId, setDeletandoDocId] = useState<number | null>(null);
   const [laudoFiles, setLaudoFiles] = useState<File[]>([]);
+  const [transportadora, setTransportadora] = useState("");
 
   const laudoRef = useRef<HTMLInputElement>(null);
 
@@ -95,6 +96,7 @@ export function ResiduosPage() {
     setForm(null);
     setDocumentos([]);
     setLaudoFiles([]);
+    setTransportadora("");
   };
 
   const handleRemoverDoc = async (docId: number) => {
@@ -322,6 +324,25 @@ export function ResiduosPage() {
                     />
                   </div>
                 )}
+              </div>
+
+              {/* Transportadora */}
+              <div className="col-span-2">
+                <label className="block mb-1.5 text-sm font-medium">Transportadora parceira</label>
+                <select
+                  className="w-full px-3 py-2 bg-white border border-border rounded-lg text-sm"
+                  value={transportadora}
+                  onChange={(e) => setTransportadora(e.target.value)}
+                >
+                  <option value="">Selecione uma transportadora...</option>
+                  <option value="TEGMA">Tegma Gestão Logística</option>
+                  <option value="JSL">JSL Logística</option>
+                  <option value="BRASPRESS">Braspress Transportes</option>
+                  <option value="PATRUS">Patrus Transportes</option>
+                  <option value="RODONAVES">Rodonaves Transportes</option>
+                  <option value="GOLLOG">Gollog</option>
+                  <option value="LOCALFRIO">Localfrio</option>
+                </select>
               </div>
 
               {/* Documentos existentes */}

@@ -15,6 +15,7 @@ export function CadastrarResiduoPage() {
 
   const [aceitouTermos, setAceitouTermos] = useState(false);
   const [laudos, setLaudos] = useState<File[]>([]);
+  const [transportadora, setTransportadora] = useState("");
   const laudoRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -293,6 +294,28 @@ export function CadastrarResiduoPage() {
                   </div>
                 </div>
               )}
+
+              {/* Transportadora */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Truck className="h-4 w-4 text-foreground" />
+                  <label className="text-sm text-foreground font-medium">Transportadora parceira</label>
+                </div>
+                <select
+                  className="w-full px-3 py-2 bg-white border border-border rounded-lg"
+                  value={transportadora}
+                  onChange={(e) => setTransportadora(e.target.value)}
+                >
+                  <option value="">Selecione uma transportadora...</option>
+                  <option value="TEGMA">Tegma Gestão Logística</option>
+                  <option value="JSL">JSL Logística</option>
+                  <option value="BRASPRESS">Braspress Transportes</option>
+                  <option value="PATRUS">Patrus Transportes</option>
+                  <option value="RODONAVES">Rodonaves Transportes</option>
+                  <option value="GOLLOG">Gollog</option>
+                  <option value="LOCALFRIO">Localfrio</option>
+                </select>
+              </div>
 
               {/* Termos de uso */}
               <div>
