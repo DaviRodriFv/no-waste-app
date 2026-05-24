@@ -20,7 +20,11 @@ export function LoginPage() {
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-primary mb-2">NoWaste</h1>
+            <img
+              src="/styles/assets/nowastelogo.jpeg"
+              alt="NoWaste"
+              className="h-16 object-contain mx-auto mb-4"
+            />
             <p className="text-muted-foreground">Acesse sua conta corporativa</p>
           </div>
 
